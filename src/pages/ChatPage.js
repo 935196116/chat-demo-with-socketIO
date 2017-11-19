@@ -208,6 +208,7 @@ export default connect(
     (state) => ({
         user: state.loginIn.user,
         chatNrList:state.chat.chatNrList
+        
     }),
     (dispatch) => ({
         connect: (user) => dispatch(socketAction.connect(user)),
