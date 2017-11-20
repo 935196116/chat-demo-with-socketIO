@@ -32,7 +32,7 @@ class TencentOSS{
       }
       static getAppsign(){
          return new Promise(function (resolve, reject) {
-             fetch('http://192.168.1.103/www/getToken.php').then((response)=>{
+             fetch('http://192.168.2.31/www/getToken.php').then((response)=>{
 
 
                  return response.json();
@@ -55,11 +55,11 @@ class TencentOSS{
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
             s4() + '-' + s4() + s4() + s4();
     }
-      static upLoad(sign,f){
+      static upLoad(sign,f,name,onProgress){
 
           return new Promise(function (resolve, reject) {
               //生成唯一文件名
-              let name = TencentOSS.guid();
+              // let name = TencentOSS.guid();
               let hz = f.path.substring(f.path.lastIndexOf("."));
 
               let remotePath ="";
@@ -95,10 +95,11 @@ class TencentOSS{
               xhr.setRequestHeader('Host', 'sh.file.myqcloud.com');
               xhr.upload.onprogress = function (evt) {
                   var percent = evt.loaded / evt.total;
-                  if (typeof onprogress === 'function') {
-                      onprogress(percent, 0);
+                  if (typeof onProgress === 'function') {
+                      onProgress(percent.toFixed(1));
+                      console.log("uploading:"+percent)
                   }
-                  console.log("upload:"+percent);
+                  // console.log("upload:"+percent);
               };
 
 

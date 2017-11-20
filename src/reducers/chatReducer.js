@@ -17,7 +17,7 @@ const  initialState = {
                 who:2,
             },
             {
-                url:"http://192.168.1.102/www/1.jpg",
+                url:"http://192.168.1.103/www/1.jpg",
                 type:2,
                 who:2,
                 width:3120,height:4160,
@@ -25,7 +25,10 @@ const  initialState = {
 
         ],
 
+
     },
+    sendingList:{}
+    ,
     socket:{},
     withWho:"kefu1",
 };
@@ -88,10 +91,26 @@ export default  function chat(state=initialState,action){
         case TYPE.SENDING_IMG:
             mes = action.mes;
             _list = pushInList(mes,state.chatNrList,state.withWho);
+            state.sendingList[mes.guid]=0;
+            console.log(state);
             return {
                 ...state,
-                chatNrList:_list
+                chatNrList:_list,
+                sendingList:state.sendingList
             };
+
+            break;
+        case TYPE.PROGRESS:
+
+            let t_sending = deepClone(state.sendingList);
+            t_sending[action.guid] =  action.per*100+"%";
+            console.log(t_sending[action.guid]);
+            console.log(state.sendingList);
+            return {
+                ...state,
+                sendingList:t_sending
+            };
+
             break;
         default:
             return state;

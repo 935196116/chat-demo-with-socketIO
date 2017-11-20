@@ -6,11 +6,12 @@ import {
     FlatList,
     TouchableOpacity,
     Image,
+    ImageBackground
 } from 'react-native';
 
 
 import { NavigationActions } from 'react-navigation';
-
+import { connect } from 'react-redux'; // 引入connect函数
 const resetAction = NavigationActions.reset({
     index: 0,
     actions: [
@@ -66,12 +67,20 @@ class ChatNrList extends Component {
 
 
                 }]}>
-                <TouchableOpacity onPress={()=>{this.props.showZoom(item)}}>
-                    <Image
-                        source={{uri:item.url}}
-                        style={{borderRadius:4,width:w,height:h,resizeMode:"cover"}}
-                        resizeMethod="resize"
-                    />
+                <TouchableOpacity style={{position:"relative",}} onPress={()=>{this.props.showZoom(item)}}>
+
+                    <ImageBackground source={{uri:item.url}}
+                                     style={{borderRadius:4,width:w,height:h,resizeMode:"cover"}}
+                                     resizeMethod="resize">
+                    <View style={[styles.imgBox,{width:w,height:h,backgroundColor: this.props.sendingList[item.guid]!=="100%"?"rgba(225,225,225,0.6)":"transparent",opacity:this.props.sendingList[item.guid]!=="100%"?1:0}]}>
+                        <Text style={styles.imgProgress}>{this.props.sendingList[item.guid]}</Text>
+                    </View>
+                    </ImageBackground>
+                    {/*<Image*/}
+                        {/*source={{uri:item.url}}*/}
+                        {/*style={{borderRadius:4,width:w,height:h,resizeMode:"cover"}}*/}
+                        {/*resizeMethod="resize"*/}
+                    {/*/>*/}
                 </TouchableOpacity>
             </View>
         )
@@ -87,7 +96,7 @@ class ChatNrList extends Component {
     }
 
     _renderItem({item}){
-        console.log(item);
+        // console.log(item);
         if(item.type === 1)
         {
             return(txtMessage(item));
@@ -105,6 +114,7 @@ class ChatNrList extends Component {
                 <FlatList
                     data={this.props.data}
                     renderItem={this._renderItem.bind(this)}
+                    extraData={this.props}
                 />
             </View>
         )
@@ -138,10 +148,31 @@ const styles = StyleSheet.create({
         borderWidth:0.5,
         borderColor:"#aaa"
 
+    },
+    imgBox:{
+        flexDirection:"row",
+        alignItems:"center",
+    },
+    imgProgress:{
+        flex:1,
+        textAlign:"center",
+        color:"red"
     }
 
 
 
 });
 
-export default ChatNrList;
+export default connect(
+    (state) => ({
+        user: state.loginIn.user,
+        chatNrList:state.chat.chatNrList,
+        sendingList:state.chat.sendingList
+    }),
+    (dispatch) => ({
+        connect: (user) => dispatch(socketAction.connect(user)),
+        send: (mes) => dispatch(socketAction.send(mes)),
+        send_img:(mes) => dispatch(socketAction.send_img(mes)),
+        onprogress:(guid,per) => dispatch(socketAction.onprogress(guid,per))
+    })
+)(ChatNrList)

@@ -49,3 +49,12 @@ export function send_img(mes) {
         })
     }
 }
+export function onprogress(guid,per) {
+    return dispatch=>{
+        dispatch({
+            type:TYPE.PROGRESS,
+            guid,
+            per
+        })
+    }
+}

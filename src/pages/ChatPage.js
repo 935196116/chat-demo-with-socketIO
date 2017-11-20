@@ -37,7 +37,8 @@ class ChatPage extends Component {
             showZoom:false,
 
             selectedImg:{
-            }
+            },
+            sending:[]
         }
 
 
@@ -65,12 +66,13 @@ class ChatPage extends Component {
             nr:""
         })
     }
-    _send_img(img){
+    _send_img(img,guid){
         let mes = {
             url:img.path,
             type:2,
             who:2,
             width:img.width,height:img.height,
+            guid
         };
         this.props.send_img(mes);
     }
@@ -96,14 +98,17 @@ class ChatPage extends Component {
             multiple: true,
             waitAnimationEnd: false,
             includeExif: true,
-            compressImageQuality:0.7
+            // compressImageQuality:0.7
         }).then(images => {
-                images.map(i => {
+                images.map((i,idx) => {
                     console.log('received image', i);
-                    this._send_img(i);
+                    let guid = TencentOSS.guid();
+                    this._send_img(i,guid);
+
                     // TencentOSS.getAppsign(TencentOSS.upLoad,"/g.jpg",i);
                     TencentOSS.getAppsign().then(key=>{
-                        TencentOSS.upLoad(key,i)
+
+                        TencentOSS.upLoad(key,i,guid,(per)=>{this.props.onprogress(guid,per)})
                             .then(
                                 response=>{
                                     response = JSON.parse( response);
@@ -208,11 +213,12 @@ export default connect(
     (state) => ({
         user: state.loginIn.user,
         chatNrList:state.chat.chatNrList
-        
+
     }),
     (dispatch) => ({
         connect: (user) => dispatch(socketAction.connect(user)),
         send: (mes) => dispatch(socketAction.send(mes)),
         send_img:(mes) => dispatch(socketAction.send_img(mes)),
+        onprogress:(guid,per) => dispatch(socketAction.onprogress(guid,per))
     })
 )(ChatPage)
