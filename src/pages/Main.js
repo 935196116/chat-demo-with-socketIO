@@ -9,7 +9,8 @@ import { connect } from 'react-redux'; // 引入connect函数
 import  *as socketAction from '../actions/socketAction';
 
 import { NavigationActions } from 'react-navigation';
-
+import * as SERVER from '../constants/serverAddr'; //导入事件类型，分配给各个事件
+import io from 'socket.io-client';
 class Main extends Component {
     static navigationOptions = {
         title: 'Main',
@@ -26,6 +27,7 @@ class Main extends Component {
     // this.props.navigation.dispatch(resetAction);
     componentDidMount(){
         this.props.connect(this.props.user);
+
 
     }
     componentWillUnmount() {

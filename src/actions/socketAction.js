@@ -7,7 +7,12 @@ export function connect(user) {
 
 
     return dispatch=>{
-        var socket = io(SERVER.SERVER_ADDR);
+        //修复只能在debug模式下才可以正常运行，问题应该是debug模式下可以通过websocket进行连接，
+        //但是取消了debug模式，就无法通过websocket进行连接了,另外附上服务端代码
+        var socket = io("ws://"+SERVER.SERVER_ADDR,{
+            transports: ['websocket'],
+        });
+       console.log(socket);
         socket.on("client_news",function (data) {
             console.log("收到:"+data);
             if(data.mes.type === 0)
