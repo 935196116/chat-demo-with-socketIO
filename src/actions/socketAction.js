@@ -9,6 +9,7 @@ export function connect(user) {
     return dispatch=>{
         var socket = io(SERVER.SERVER_ADDR);
         socket.on("client_news",function (data) {
+            console.log("收到:"+data);
             if(data.mes.type === 0)
             {
                 let d = {
@@ -26,6 +27,13 @@ export function connect(user) {
                         socket:socket,
                         type:TYPE.CONNECT_ERROR
                     })
+            }
+            else
+            {
+                dispatch({
+                    type:TYPE.RECEIVE,
+                    mes:data.mes
+                })
             }
 
         })

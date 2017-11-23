@@ -24,7 +24,7 @@ const  initialState = {
             }
 
         ],
-
+        xiaobai:[]
 
     },
     sendingList:{}
@@ -68,7 +68,22 @@ export default  function chat(state=initialState,action){
                 ...state,
             };
             break;
+        case TYPE.RECEIVE:
+        {
+            console.log(state);
+            let mes = action.mes;
+            let _list;
+            if(action.mes.type===1)
+                _list = pushInList(mes,state.chatNrList,mes.from);
 
+                return {
+                    ...state,
+                    chatNrList:_list
+                };
+
+
+        }
+            break;
         case TYPE.SEND:
             console.log(state);
             let mes = action.mes;

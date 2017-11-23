@@ -58,10 +58,10 @@ class ChatPage extends Component {
     }
     _sendTxt(){
         let mes = {
-            uid:this.props.user.name,
             content:this.state.nr,
             type:1,
             who:2,
+            from:this.props.user.name
         };
         this.props.send(mes);
         this.setState({
@@ -74,7 +74,8 @@ class ChatPage extends Component {
             type:2,
             who:2,
             width:img.width,height:img.height,
-            guid
+            guid,
+            from:this.props.user.name
         };
         this.props.send_img(mes);
     }
@@ -88,7 +89,7 @@ class ChatPage extends Component {
             <View style={styles.container}>
                 {/*消息列表*/}
                 <ChatNrList
-                    data={this.props.chatNrList.kefu1}
+                    data={this.props.chatNrList[this.props.withWho]}
                     showZoom={this.showZoom.bind(this)}
                 />
                 {/*输入区域*/}
@@ -173,7 +174,8 @@ const styles = StyleSheet.create({
 export default connect(
     (state) => ({
         user: state.loginIn.user,
-        chatNrList:state.chat.chatNrList
+        chatNrList:state.chat.chatNrList,
+        withWho:state.chat.withWho,
 
     }),
     (dispatch) => ({
