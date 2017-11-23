@@ -32,7 +32,7 @@ class TencentOSS{
       }
       static getAppsign(){
          return new Promise(function (resolve, reject) {
-             fetch('http://192.168.2.31/www/getToken.php').then((response)=>{
+             fetch('http://192.168.1.104/www/getToken.php').then((response)=>{
 
 
                  return response.json();
@@ -93,6 +93,10 @@ class TencentOSS{
               xhr.open('POST', url, true);
               xhr.setRequestHeader('Origin', 'http://localhost');
               xhr.setRequestHeader('Host', 'sh.file.myqcloud.com');
+              xhr.timeout = 1000*60;
+              xhr.ontimeout = function(event){
+                  alert("上传失败");
+              };
               xhr.upload.onprogress = function (evt) {
                   var percent = evt.loaded / evt.total;
                   if (typeof onProgress === 'function') {

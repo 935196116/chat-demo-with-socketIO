@@ -83,15 +83,21 @@ export default  function chat(state=initialState,action){
                 }
             };
             state.socket.emit("serv_receive",data);
-            return {
-                ...state,
-                chatNrList:_list
-            };
+            if(action.mes.type===1)
+                return {
+                    ...state,
+                    chatNrList:_list
+                };
+            else
+                return {
+                    ...state,
+                };
             break;
         case TYPE.SENDING_IMG:
             mes = action.mes;
-            _list = pushInList(mes,state.chatNrList,state.withWho);
+
             state.sendingList[mes.guid]=0;
+            _list = pushInList(mes,state.chatNrList,state.withWho);
             console.log(state);
             return {
                 ...state,
@@ -103,7 +109,9 @@ export default  function chat(state=initialState,action){
         case TYPE.PROGRESS:
 
             let t_sending = deepClone(state.sendingList);
-            t_sending[action.guid] =  action.per*100+"%";
+            let per = action.per*100;
+            if(per>0)
+                 t_sending[action.guid] =  per-1+"%";
             console.log(t_sending[action.guid]);
             console.log(state.sendingList);
             return {

@@ -5,17 +5,18 @@ import {
     View,
     Image,
     TouchableOpacity,
-    Button,
-    NativeModules
+
 } from 'react-native';
 import { connect } from 'react-redux'; // 引入connect函数
 import  *as socketAction from '../actions/socketAction';
 import { NavigationActions } from 'react-navigation';
 import ChatNrList from '../componets/ChatNrList';
 import AutoGrowingTextInputFixed from '../componets/TextInputAutoGrow';
-const ImagePicker = NativeModules.ImageCropPicker;
+
 import ImageZoomView from '../componets/ImageZoomView'
-import TencentOSS from '../componets/TencentOSS'
+import SelectPic from '../componets/SelectPic'
+
+
 const resetAction = NavigationActions.reset({
     index: 0,
     actions: [
@@ -57,6 +58,7 @@ class ChatPage extends Component {
     }
     _sendTxt(){
         let mes = {
+            uid:this.props.user.name,
             content:this.state.nr,
             type:1,
             who:2,
@@ -66,7 +68,7 @@ class ChatPage extends Component {
             nr:""
         })
     }
-    _send_img(img,guid){
+    _sendingImg(img,guid){
         let mes = {
             url:img.path,
             type:2,
@@ -76,60 +78,10 @@ class ChatPage extends Component {
         };
         this.props.send_img(mes);
     }
-    _pickSingleWithCamera(){
-        ImagePicker.openCamera({
-            cropping: false,
-            width: 500,
-            height: 500,
-            includeExif: true,
-            compressImageQuality:0.7
-        }).then(image => {
-            console.log('received image', image);
-            this.setState({
-                image: {uri: image.path, width: image.width, height: image.height},
-                images: null
-            });
-            console.log(image);
-            TencentOSS.getAppsign(TencentOSS.upLoad,"/g.jpg",image);
-        }).catch(e => alert(e));
-    }
-    _pickMultiple() {
-        ImagePicker.openPicker({
-            multiple: true,
-            waitAnimationEnd: false,
-            includeExif: true,
-            // compressImageQuality:0.7
-        }).then(images => {
-                images.map((i,idx) => {
-                    console.log('received image', i);
-                    let guid = TencentOSS.guid();
-                    this._send_img(i,guid);
 
-                    // TencentOSS.getAppsign(TencentOSS.upLoad,"/g.jpg",i);
-                    TencentOSS.getAppsign().then(key=>{
+    _showModal = () => this.setState({ isModalVisible: true });
 
-                        TencentOSS.upLoad(key,i,guid,(per)=>{this.props.onprogress(guid,per)})
-                            .then(
-                                response=>{
-                                    response = JSON.parse( response);
-                                    if(response.code ===0)
-                                    {
-                                        console.log("success upload");
-                                    }
-                                    else
-                                    {
-                                        alert("上传失败,请重新选择");
-                                    }
-                                }
-                            )
-
-                    }).catch( e=> alert(e));
-                    return {uri: i.path, width: i.width, height: i.height, mime: i.mime};
-                })
-
-        }).catch(e => alert(e));
-    }
-
+    _hideModal = () => this.setState({ isModalVisible: false });
     render() {
         // console.log(this.props.chatNrList);
         return(
@@ -154,7 +106,7 @@ class ChatPage extends Component {
                         <Text style={{fontSize:16,color:"#fff"}}>发送</Text>
                     </TouchableOpacity>
                     {/*选择图片/相机*/}
-                    <TouchableOpacity onPress={()=>{this._pickMultiple()}}>
+                    <TouchableOpacity onPress={()=>{this._showModal()}}>
                         <Image
                             source={require("../../img/add.png")}
                             style={{width:28,height:28,marginBottom:4}}
@@ -169,6 +121,14 @@ class ChatPage extends Component {
                     isShow={this.state.showZoom}
                     onBackdropPress={()=>{this.setState({showZoom:false})}}
                 />
+                <SelectPic
+                    _hideModal={this._hideModal.bind(this)}
+                    isModalVisible={this.state.isModalVisible}
+                    _sendingImg = {this._sendingImg.bind(this)}
+                    send={this.props.send.bind(this)}
+                    onprogress={this.props.onprogress.bind(this)}
+                />
+
             </View>
         )
     }
@@ -179,6 +139,7 @@ const styles = StyleSheet.create({
         flex: 1,
 
     },
+
     mainBtn:{
         width:200,
         height:90,

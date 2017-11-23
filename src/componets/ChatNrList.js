@@ -60,30 +60,56 @@ class ChatNrList extends Component {
             var w = 100;
         }
 
-        return(
-            <View style={[styles.txtBox,styles.scaleY,
-                {
-                    justifyContent:item.who===1?left:right,
+        if(this.props.sendingList[item.guid])
+        {
+            let bgc = this.props.sendingList[item.guid]!=="100%"?"rgba(225,225,225,0.6)":"transparent";
+            let opacity = this.props.sendingList[item.guid]!=="100%"?1:0;
+            return(
+                <View style={[styles.txtBox,styles.scaleY,
+                    {
+                        justifyContent:item.who===1?left:right,
 
 
-                }]}>
-                <TouchableOpacity style={{position:"relative",}} onPress={()=>{this.props.showZoom(item)}}>
+                    }]}>
+                    <TouchableOpacity style={{position:"relative",}} onPress={()=>{this.props.showZoom(item)}}>
 
-                    <ImageBackground source={{uri:item.url}}
-                                     style={{borderRadius:4,width:w,height:h,resizeMode:"cover"}}
-                                     resizeMethod="resize">
-                    <View style={[styles.imgBox,{width:w,height:h,backgroundColor: this.props.sendingList[item.guid]!=="100%"?"rgba(225,225,225,0.6)":"transparent",opacity:this.props.sendingList[item.guid]!=="100%"?1:0}]}>
-                        <Text style={styles.imgProgress}>{this.props.sendingList[item.guid]}</Text>
-                    </View>
-                    </ImageBackground>
-                    {/*<Image*/}
+                        <View style={[styles.imgBox]}>
+                            <Image source={{uri:item.url}}
+                                   style={{borderRadius:8,width:w,height:h,                                           resizeMode:"cover"}}
+                                   resizeMethod="resize"/>
+                            <View style={[styles.imgBox,{width:w,height:h,backgroundColor:bgc,opacity:opacity,position:"absolute",zIndex:10}]}>
+                                <Text style={styles.imgProgress}>{this.props.sendingList[item.guid]}</Text>
+                            </View>
+
+                        </View>
+                        {/*<Image*/}
                         {/*source={{uri:item.url}}*/}
                         {/*style={{borderRadius:4,width:w,height:h,resizeMode:"cover"}}*/}
                         {/*resizeMethod="resize"*/}
-                    {/*/>*/}
-                </TouchableOpacity>
-            </View>
-        )
+                        {/*/>*/}
+                    </TouchableOpacity>
+                </View>
+            )
+        }
+        else
+            return(
+                <View style={[styles.txtBox,styles.scaleY,
+                    {
+                        justifyContent:item.who===1?left:right,
+
+
+                    }]}>
+                    <TouchableOpacity style={{position:"relative"}} onPress={()=>{this.props.showZoom(item)}}>
+
+                        <Image source={{uri:item.url}}
+                                         style={[{resizeMode:"contain",width:w,height:h,borderRadius:8},styles.imgBox]}
+                                         resizeMethod="resize"/>
+
+
+
+                    </TouchableOpacity>
+                </View>
+            )
     }
 
     // this.props.navigation.dispatch(resetAction);
@@ -152,11 +178,13 @@ const styles = StyleSheet.create({
     imgBox:{
         flexDirection:"row",
         alignItems:"center",
+        borderRadius:8,
+
     },
     imgProgress:{
         flex:1,
         textAlign:"center",
-        color:"red"
+        color:"#666"
     }
 
 
