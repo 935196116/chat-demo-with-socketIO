@@ -6,18 +6,9 @@ import {
     FlatList,
     TouchableOpacity,
     Image,
-    ImageBackground
 } from 'react-native';
 
 
-import { NavigationActions } from 'react-navigation';
-import { connect } from 'react-redux'; // 引入connect函数
-const resetAction = NavigationActions.reset({
-    index: 0,
-    actions: [
-        NavigationActions.navigate({ routeName: 'Login'})
-    ]
-});
 const right = "flex-end";
 const left = "flex-start";
 const txtMessage = (item)=>{
@@ -191,16 +182,4 @@ const styles = StyleSheet.create({
 
 });
 
-export default connect(
-    (state) => ({
-        user: state.loginIn.user,
-        chatNrList:state.chat.chatNrList,
-        sendingList:state.chat.sendingList
-    }),
-    (dispatch) => ({
-        connect: (user) => dispatch(socketAction.connect(user)),
-        send: (mes) => dispatch(socketAction.send(mes)),
-        send_img:(mes) => dispatch(socketAction.send_img(mes)),
-        onprogress:(guid,per) => dispatch(socketAction.onprogress(guid,per))
-    })
-)(ChatNrList)
+export {ChatNrList as default};

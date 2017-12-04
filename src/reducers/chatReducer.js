@@ -2,27 +2,10 @@
 
 
 import  * as TYPE from '../constants/socketTypes';
-
+import  '../componets/Storage';
 const  initialState = {
     chatNrList: {
         kefu1:[
-            {
-                content:"你好小白1你好小白1你好小白1你好小白1你好小白1",
-                type:1,
-                who:1,
-            },
-            {
-                content:"你好小白2",
-                type:1,
-                who:2,
-            },
-            {
-                url:"http://192.168.1.103/www/1.jpg",
-                type:2,
-                who:2,
-                width:3120,height:4160,
-            }
-
         ],
         xiaobai:[]
 
@@ -41,23 +24,41 @@ function deepClone(obj){
     }
     return newObj;
 }
+function save2History(_list) {
+    storage.save({
+        key: 'chatNrList',  // 注意:请不要在key中使用_下划线符号!
+        data: _list,
+
+        // 如果不指定过期时间，则会使用defaultExpires参数
+        // 如果设为null，则永不过期
+        expires: null
+    });
+}
 function pushInList(data,list,who) {
 
 
     var  _list = deepClone(list);
-    _list[who].unshift(data);
-    console.log(_list);
+    if(!_list[who])
+    {
+        _list[who] = [];
 
+    }
+    _list[who].unshift(data);
+    // console.log(_list);
+    save2History(_list);
     return _list;
 }
+
 export default  function chat(state=initialState,action){
 
     switch (action.type)
     {
         case TYPE.CONNECTING:
+
             return {
                 ...state,
                 socket:action.socket,
+                chatNrList:action.chatNrList
 
             };
             break;
@@ -75,7 +76,6 @@ export default  function chat(state=initialState,action){
             let _list;
             if(action.mes.type===1)
                 _list = pushInList(mes,state.chatNrList,mes.from);
-
                 return {
                     ...state,
                     chatNrList:_list
@@ -85,7 +85,14 @@ export default  function chat(state=initialState,action){
         }
             break;
         case TYPE.SEND:
-            console.log(state);
+            if(state.socket.disconnected)//判断是否断开了连接
+            {
+                state.socket.emit("serv_receive",{
+                    type: HEADTBEAT,
+                    nr: "",
+                });
+            }
+            // console.log(state);
             let mes = action.mes;
             let _list;
             if(action.mes.type===1)
@@ -98,6 +105,7 @@ export default  function chat(state=initialState,action){
                 }
             };
             state.socket.emit("serv_receive",data);
+
             if(action.mes.type===1)
                 return {
                     ...state,

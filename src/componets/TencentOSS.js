@@ -32,7 +32,7 @@ class TencentOSS{
       }
       static getAppsign(){
          return new Promise(function (resolve, reject) {
-             fetch('http://192.168.1.104/www/getToken.php').then((response)=>{
+             fetch('http://192.168.1.105/www/getToken.php').then((response)=>{
 
 
                  return response.json();

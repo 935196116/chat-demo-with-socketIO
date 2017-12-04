@@ -91,6 +91,7 @@ class ChatPage extends Component {
                 <ChatNrList
                     data={this.props.chatNrList[this.props.withWho]}
                     showZoom={this.showZoom.bind(this)}
+                    sendingList={this.props.sendingList}
                 />
                 {/*输入区域*/}
                 <View style={{alignItems:"flex-end",backgroundColor:"#fff",flexDirection:"row"}}>
@@ -175,6 +176,7 @@ export default connect(
     (state) => ({
         user: state.loginIn.user,
         chatNrList:state.chat.chatNrList,
+        sendingList:state.chat.sendingList,
         withWho:state.chat.withWho,
 
     }),
