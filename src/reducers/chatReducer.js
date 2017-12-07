@@ -3,12 +3,9 @@
 
 import  * as TYPE from '../constants/socketTypes';
 import  '../componets/Storage';
+
 const  initialState = {
     chatNrList: {
-        kefu1:[
-        ],
-        xiaobai:[]
-
     },
     sendingList:{}
     ,
@@ -45,7 +42,7 @@ function pushInList(data,list,who) {
     }
     _list[who].unshift(data);
     // console.log(_list);
-    save2History(_list);
+
     return _list;
 }
 
@@ -73,9 +70,11 @@ export default  function chat(state=initialState,action){
         {
             console.log(state);
             let mes = action.mes;
+
             let _list;
             if(action.mes.type===1)
                 _list = pushInList(mes,state.chatNrList,mes.from);
+            save2History(_list);
                 return {
                     ...state,
                     chatNrList:_list
@@ -83,58 +82,145 @@ export default  function chat(state=initialState,action){
 
 
         }
+         break;
+        case TYPE.SEND_DONE:
+            {
+
+
+
+                    let t_sending = deepClone(state.sendingList);
+                    t_sending[action.mes.guid].per =  100;
+                    console.log(t_sending);
+                    //发送成功，删除发送列表中的对应记录
+
+                    clearTimeout(t_sending[action.mes.guid].timer);
+                    delete t_sending[action.mes.guid];
+                     save2History(state.chatNrList);
+                    return {
+                        ...state,
+                        sendingList:t_sending
+                    };
+
+
+
+            }
+
+
+            break;
+        case TYPE.SEND_ERROR:
+        {
+
+
+
+            let t_sending = deepClone(state.sendingList);
+            t_sending[action.mes.guid].per =  -1000;
+            console.log(t_sending);
+
+            return {
+                ...state,
+                sendingList:t_sending
+            };
+
+
+
+        }
+
+
             break;
         case TYPE.SEND:
-            if(state.socket.disconnected)//判断是否断开了连接
-            {
-                state.socket.emit("serv_receive",{
-                    type: HEADTBEAT,
-                    nr: "",
-                });
-            }
-            // console.log(state);
+
+
             let mes = action.mes;
-            let _list;
-            if(action.mes.type===1)
-                 _list = pushInList(mes,state.chatNrList,state.withWho);
+
+            // if(action.mes.type===1)
+            //      _list = pushInList(mes,state.chatNrList,state.withWho);
             let data = {
                 toUid:state.withWho,
                 mes:{
                     ...mes,
-                    who:1
+                    who:1,
+
                 }
             };
-            state.socket.emit("serv_receive",data);
+            try{
 
-            if(action.mes.type===1)
-                return {
-                    ...state,
-                    chatNrList:_list
-                };
-            else
+
+                    let t_list=[];
+                    if(action.mes.type === 1)
+                    t_list   = pushInList(action.mes,state.chatNrList,state.withWho);
+                    state.sendingList[mes.guid]={
+                      per:0,
+                      mes
+                    };
+
+                    console.log(mes);
+
+
+
+                state.socket.emit("serv_receive",data,function () {
+
+                    // action.dispatch({
+                    //     type:TYPE.SEND_DONE,
+                    //     mes:mes
+                    // });
+                    action.send_done(mes);
+
+                });
+                if(state.sendingList[mes.guid].timer)
+                    clearTimeout(state.sendingList[mes.guid].timer);
+                //30秒触发发送失败
+                let t_id = setTimeout(function () {
+                    action.send_error(mes);
+                },30000);
+                state.sendingList[mes.guid].timer = t_id;
+
+                if(action.mes.type === 1)
+                    return {
+                        ...state,
+                        chatNrList:t_list,
+                        sendingList:state.sendingList
+                    };
+
+            }
+            catch(e){
+                alert("连接服务器失败!");
+                console.log(e);
+            }
                 return {
                     ...state,
                 };
             break;
         case TYPE.SENDING_IMG:
-            mes = action.mes;
+            {
+                mes = action.mes;
 
-            state.sendingList[mes.guid]=0;
-            _list = pushInList(mes,state.chatNrList,state.withWho);
-            console.log(state);
-            return {
-                ...state,
-                chatNrList:_list,
-                sendingList:state.sendingList
-            };
+                state.sendingList[mes.guid]={
+                    per:0,
+                    mes
+                };
+
+                //90秒触发发送失败
+                let t_id = setTimeout(function () {
+                    action.send_error(mes);
+                },90000);
+                state.sendingList[mes.guid].timer = t_id;
+                let _list = pushInList(mes,state.chatNrList,state.withWho);
+                console.log(state);
+                return {
+                    ...state,
+                    chatNrList:_list,
+                    sendingList:state.sendingList
+                };
+            }
+
 
             break;
         case TYPE.PROGRESS:
 
             let t_sending = deepClone(state.sendingList);
-            let per = action.per*100;
+            let per = action.per*100-1;
             if(per>0)
-                 t_sending[action.guid] =  per-1+"%";
+                 t_sending[action.guid].per =  per;
             console.log(t_sending[action.guid]);
             console.log(state.sendingList);
             return {

@@ -38,9 +38,10 @@ class SelectPic extends Component {
                                 url:response.data.access_url,
                                 type:2,
                                 who:1,
+                                guid
                             };
                             this.props.send(mes);
-                            this.props.onprogress(guid,1.01);
+                            // this.props.onprogress(guid,1.01);
                             console.log(response.access_url);
                             console.log("success upload");
 
@@ -56,6 +57,7 @@ class SelectPic extends Component {
 
     }
     _pickSingleWithCamera(){
+        this.props._hideModal();
         ImagePicker.openCamera({
             cropping: false,
             width: 500,
@@ -63,7 +65,7 @@ class SelectPic extends Component {
             includeExif: true,
             compressImageQuality:0.8
         }).then(image => {
-            this.props._hideModal();
+
             console.log('received image', image);
             //上传
             this._upload(image);
@@ -72,13 +74,14 @@ class SelectPic extends Component {
         }).catch(e => alert(e));
     }
     _pickMultiple() {
+        this.props._hideModal();
         ImagePicker.openPicker({
             multiple: true,
             waitAnimationEnd: false,
             includeExif: true,
             compressImageQuality:0.7
         }).then(images => {
-            this.props._hideModal();
+
             images.map((i,idx) => {
                 console.log('received image', i);
 

@@ -1,53 +1,57 @@
 import * as SERVER from '../constants/serverAddr'; //导入事件类型，分配给各个事件
 import io from 'socket.io-client';
 
-import  * as TYPE from '../constants/socketTypes';
+import * as TYPE from '../constants/socketTypes';
+import TencentOSS from '../componets/TencentOSS'
+function resend_sendingList() {
 
-
+}
 export function connect(user) {
 
 
-    return dispatch=>{
+    return dispatch => {
         //修复只能在debug模式下才可以正常运行，问题应该是debug模式下可以通过websocket进行连接，
         //但是取消了debug模式，就无法通过websocket进行连接了,另外附上服务端代码
-        var socket = io("ws://"+SERVER.SERVER_ADDR,{
+        var socket = io("ws://" + SERVER.SERVER_ADDR, {
             transports: ['websocket'],
+            pingTimeout: 30000
         });
-       console.log(socket);
-        socket.on("client_news",function (data) {
-            console.log("收到:"+data);
-            if(data.mes.type === 0)
-            {
+        console.log(socket);
+        socket.on("client_news", function(data) {
+            console.log("收到:" + data);
+            //连接验证
+            if (data.mes.type === 0) {
                 let d = {
-                    uid:user.name,
-                    id:socket.id
+                    uid: user.name,
+                    id: socket.id
                 };
-                socket.emit("serv_receive",d);
+                socket.emit("serv_receive", d);
 
+                // TODO:检查sending列表，重发消息
 
-                if(!socket.disconnected)
-                {
-                    getHistoryData((list)=>{
+                /////////////
+                if (!socket.disconnected) {
+
+                    getHistoryData((list) => {
 
                         dispatch({
-                            socket:socket,
-                            chatNrList:list,
-                            type:TYPE.CONNECTING
+                            socket: socket,
+                            chatNrList: list,
+                            type: TYPE.CONNECTING
                         });
                     });
 
                 }
                 else
                     dispatch({
-                        socket:socket,
-                        type:TYPE.CONNECT_ERROR
+                        socket: socket,
+                        type: TYPE.CONNECT_ERROR
                     })
-            }
-            else
-            {
+            } else {//接受消息
+                data.mes.guid = TencentOSS.guid();
                 dispatch({
-                    type:TYPE.RECEIVE,
-                    mes:data.mes
+                    type: TYPE.RECEIVE,
+                    mes: data.mes
                 })
             }
 
@@ -56,32 +60,53 @@ export function connect(user) {
 
 }
 
-export function send(mes) {
-    return dispatch=>{
+export function send(mes, send_done,send_error) {
+    return dispatch => {
         dispatch({
-            type:TYPE.SEND,
-            mes:mes
+            type: TYPE.SEND,
+            mes: mes,
+            send_done,
+            send_error,
         })
     }
 }
-export function send_img(mes) {
-    return dispatch=>{
+
+export function update_chatNrList(mes) {
+    return dispatch => {
         dispatch({
-            type:TYPE.SENDING_IMG,
-            mes:mes
+            type: TYPE.SEND_DONE,
+            mes: mes
         })
     }
 }
-export function onprogress(guid,per) {
-    return dispatch=>{
+export function send_error(mes) {
+    return dispatch => {
         dispatch({
-            type:TYPE.PROGRESS,
+            type: TYPE.SEND_ERROR,
+            mes: mes
+        })
+    }
+}
+export function send_img(mes,send_error) {
+    return dispatch => {
+        dispatch({
+            type: TYPE.SENDING_IMG,
+            mes: mes,
+            send_error
+        })
+    }
+}
+export function onprogress(guid, per) {
+    return dispatch => {
+        dispatch({
+            type: TYPE.PROGRESS,
             guid,
             per
         })
     }
 }
 function getHistoryData(connect) {
+
     storage.load({
         key: 'chatNrList',
 
@@ -94,12 +119,12 @@ function getHistoryData(connect) {
         syncInBackground: true,
 
         // 你还可以给sync方法传递额外的参数
-        syncParams: {
-            extraFetchOptions: {
-                // 各种参数
-            },
-            someFlag: true,
-        },
+        // syncParams: {
+        //     extraFetchOptions: {
+        //         // 各种参数
+        //     },
+        //     someFlag: true,
+        // },
     }).then(ret => {
         // 如果找到数据，则在then方法中返回
         // 注意：这是异步返回的结果（不了解异步请自行搜索学习）
@@ -116,12 +141,14 @@ function getHistoryData(connect) {
         //或者有其他异常，则在catch中返回
         console.warn(err.message);
         switch (err.name) {
-            case 'NotFoundError':
-                // TODO;
-                break;
-            case 'ExpiredError':
-                // TODO
-                break;
+        case 'NotFoundError':
+            // TODO;
+            break;
+        case 'ExpiredError':
+            // TODO
+            break;
         }
     })
 }
+
+

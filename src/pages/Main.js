@@ -21,7 +21,9 @@ class Main extends Component {
     {
         super(props);
 
-
+        console.ignoredYellowBox = [
+            'Setting a timer'
+        ];
 
 
 

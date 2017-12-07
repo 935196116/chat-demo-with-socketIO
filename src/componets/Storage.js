@@ -38,3 +38,27 @@ global.storage = storage;
 // 注意：全局变量一定是先声明，后使用
 // 如果你在某处调用storage报错未定义
 // 请检查global.storage = storage语句是否确实已经执行过了
+
+storage.sync = {
+
+    // The name of the sync method must be the same of the data's key
+    // And the passed params will be an all-in-one object.
+    // You can use promise here.
+    // Or plain callback function with resolve/reject, like:
+    chatNrList(params){
+
+
+        let { resolve, reject } = params;
+        // Call resolve() when succeed
+        try{
+            let chatNrList ={};
+            resolve && resolve(chatNrList);
+        }
+        catch(e){
+            console.log(e);
+            reject && reject(new Error('socketaction [165]'));
+        }
+
+
+    }
+};

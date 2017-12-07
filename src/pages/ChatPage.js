@@ -15,7 +15,7 @@ import AutoGrowingTextInputFixed from '../componets/TextInputAutoGrow';
 
 import ImageZoomView from '../componets/ImageZoomView'
 import SelectPic from '../componets/SelectPic'
-
+import TencentOSS from '../componets/TencentOSS'
 
 const resetAction = NavigationActions.reset({
     index: 0,
@@ -40,7 +40,10 @@ class ChatPage extends Component {
             selectedImg:{
             },
             sending:[]
-        }
+        };
+        console.ignoredYellowBox = [
+            'Setting a timer'
+        ];
 
 
     }
@@ -61,14 +64,15 @@ class ChatPage extends Component {
             content:this.state.nr,
             type:1,
             who:2,
-            from:this.props.user.name
+            from:this.props.user.name,
+            guid:TencentOSS.guid()
         };
-        this.props.send(mes);
+        this.props.send(mes,this.props.send_done,this.props.send_error);
         this.setState({
             nr:""
         })
     }
-    _sendingImg(img,guid){
+    _sendingImg(img,guid,send_error){
         let mes = {
             url:img.path,
             type:2,
@@ -77,7 +81,7 @@ class ChatPage extends Component {
             guid,
             from:this.props.user.name
         };
-        this.props.send_img(mes);
+        this.props.send_img(mes,send_error);
     }
 
     _showModal = () => this.setState({ isModalVisible: true });
@@ -92,7 +96,9 @@ class ChatPage extends Component {
                     data={this.props.chatNrList[this.props.withWho]}
                     showZoom={this.showZoom.bind(this)}
                     sendingList={this.props.sendingList}
-                />
+
+
+                 />
                 {/*输入区域*/}
                 <View style={{alignItems:"flex-end",backgroundColor:"#fff",flexDirection:"row"}}>
                     {/*文字输入*/}
@@ -126,8 +132,8 @@ class ChatPage extends Component {
                 <SelectPic
                     _hideModal={this._hideModal.bind(this)}
                     isModalVisible={this.state.isModalVisible}
-                    _sendingImg = {this._sendingImg.bind(this)}
-                    send={this.props.send.bind(this)}
+                    _sendingImg = {(img,guid)=>{this._sendingImg(img,guid,this.props.send_error)}}
+                    send={(mes)=>{this.props.send(mes,this.props.send_done,this.props.send_error)}}
                     onprogress={this.props.onprogress.bind(this)}
                 />
 
@@ -182,8 +188,10 @@ export default connect(
     }),
     (dispatch) => ({
         connect: (user) => dispatch(socketAction.connect(user)),
-        send: (mes) => dispatch(socketAction.send(mes)),
-        send_img:(mes) => dispatch(socketAction.send_img(mes)),
-        onprogress:(guid,per) => dispatch(socketAction.onprogress(guid,per))
+        send: (mes,send_done,send_error) => dispatch(socketAction.send(mes,send_done,send_error)),
+        send_img:(mes,send_error) => dispatch(socketAction.send_img(mes,send_error)),
+        onprogress:(guid,per) => dispatch(socketAction.onprogress(guid,per)),
+        send_done:(mes)=>dispatch(socketAction.update_chatNrList(mes)),
+        send_error:(mes)=>dispatch(socketAction.send_error(mes)),
     })
 )(ChatPage)

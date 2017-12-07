@@ -20,7 +20,7 @@ io.on('connection', function(socket) {
         console.log("sendEvent: " + data);
     });
 
-    socket.on('serv_receive', function(data) {
+    socket.on('serv_receive', function(data, callback) {
         console.log(data);
         if (data.uid) {
             user[data.uid] = data.id;
@@ -35,6 +35,8 @@ io.on('connection', function(socket) {
                 //TODO:将离线信息缓存到数据库中
                 console.log("信息缓存");
             }
+            if (callback)
+                callback();
 
         }
     });
