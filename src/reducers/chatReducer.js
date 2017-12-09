@@ -51,7 +51,11 @@ export default  function chat(state=initialState,action){
     switch (action.type)
     {
         case TYPE.CONNECTING:
-
+            if(state.chatNrList[state.withWho])
+                return {
+                    ...state,
+                    socket:action.socket,
+                };
             return {
                 ...state,
                 socket:action.socket,
@@ -114,11 +118,24 @@ export default  function chat(state=initialState,action){
 
             let t_sending = deepClone(state.sendingList);
             t_sending[action.mes.guid].per =  -1000;
-            console.log(t_sending);
+            // console.log(t_sending);
 
+            let t_list = deepClone(state.chatNrList);
+            let t_chatNr = t_list[state.withWho];
+
+            for(let i = 0; i < t_chatNr.length ; i++)
+            {
+                if(t_chatNr[i].guid === action.mes.guid)
+                {
+                    t_chatNr[i].failed = true;
+                    break;
+                }
+            }
+            console.log(t_list);
             return {
                 ...state,
-                sendingList:t_sending
+                sendingList:t_sending,
+                chatNrList:t_list
             };
 
 
@@ -194,16 +211,19 @@ export default  function chat(state=initialState,action){
             {
                 mes = action.mes;
 
-                state.sendingList[mes.guid]={
-                    per:0,
-                    mes
-                };
-
                 //90秒触发发送失败
                 let t_id = setTimeout(function () {
                     action.send_error(mes);
                 },90000);
-                state.sendingList[mes.guid].timer = t_id;
+                state.sendingList[mes.guid]={
+                    per:0,
+                    mes,
+                    timer : t_id,
+                };
+
+
+
+
                 let _list = pushInList(mes,state.chatNrList,state.withWho);
                 console.log(state);
                 return {

@@ -54,6 +54,7 @@ class ChatPage extends Component {
 
     }
     showZoom(item) {
+        console.log("zoomPIC:"+item);
         this.setState({
             showZoom:true,
             selectedImg:item
@@ -107,6 +108,7 @@ class ChatPage extends Component {
                       placeholder="请输入聊天内容"
                       placeholderTextColor="#aaa"
                       value={this.state.nr}
+                      underlineColorAndroid='transparent'
                       onChangeText={(text) => this.setState({nr:text})}
                     />
                     {/*发送按钮*/}
