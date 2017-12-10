@@ -9,12 +9,12 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux'; // 引入connect函数
 import  *as socketAction from '../actions/socketAction';
+
 import { NavigationActions } from 'react-navigation';
 import ChatNrList from '../componets/ChatNrList';
 import AutoGrowingTextInputFixed from '../componets/TextInputAutoGrow';
-
-import ImageZoomView from '../componets/ImageZoomView'
 import SelectPic from '../componets/SelectPic'
+
 import TencentOSS from '../componets/TencentOSS'
 
 const resetAction = NavigationActions.reset({
@@ -36,10 +36,8 @@ class ChatPage extends Component {
         this.state = {
             nr:"",
             showZoom:false,
-
             selectedImg:{
             },
-            sending:[]
         };
         console.ignoredYellowBox = [
             'Setting a timer'
@@ -48,18 +46,15 @@ class ChatPage extends Component {
 
     }
 
-    // this.props.navigation.dispatch(resetAction);
-    componentDidMount(){
 
 
-    }
-    showZoom(item) {
-        console.log("zoomPIC:"+item);
-        this.setState({
-            showZoom:true,
-            selectedImg:item
-        })
-    }
+    // showZoom(item) {
+    //
+    //     this.setState({
+    //         showZoom:true,
+    //         selectedImg:item
+    //     })
+    // }
     _sendTxt(){
         let mes = {
             content:this.state.nr,
@@ -88,6 +83,7 @@ class ChatPage extends Component {
     _showModal = () => this.setState({ isModalVisible: true });
 
     _hideModal = () => this.setState({ isModalVisible: false });
+
     render() {
         // console.log(this.props.chatNrList);
         return(
@@ -95,10 +91,8 @@ class ChatPage extends Component {
                 {/*消息列表*/}
                 <ChatNrList
                     data={this.props.chatNrList[this.props.withWho]}
-                    showZoom={this.showZoom.bind(this)}
+                    // showZoom={this.showZoom.bind(this)}
                     sendingList={this.props.sendingList}
-
-
                  />
                 {/*输入区域*/}
                 <View style={{alignItems:"flex-end",backgroundColor:"#fff",flexDirection:"row"}}>
@@ -124,21 +118,14 @@ class ChatPage extends Component {
                     </TouchableOpacity>
 
                 </View>
-                <ImageZoomView
-                    url={this.state.selectedImg.url}
-                    width={this.state.selectedImg.width}
-                    height={this.state.selectedImg.height}
-                    isShow={this.state.showZoom}
-                    onBackdropPress={()=>{this.setState({showZoom:false})}}
-                />
+
                 <SelectPic
                     _hideModal={this._hideModal.bind(this)}
                     isModalVisible={this.state.isModalVisible}
-                    _sendingImg = {(img,guid)=>{this._sendingImg(img,guid,this.props.send_error)}}
+                    sendingImg = {(img,guid)=>{this._sendingImg(img,guid,this.props.send_error)}}
                     send={(mes)=>{this.props.send(mes,this.props.send_done,this.props.send_error)}}
                     onprogress={this.props.onprogress.bind(this)}
                 />
-
             </View>
         )
     }
@@ -147,6 +134,7 @@ class ChatPage extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+
 
     },
 
@@ -175,7 +163,7 @@ const styles = StyleSheet.create({
         marginBottom:4
 
 
-    }
+    },
 
 
 });

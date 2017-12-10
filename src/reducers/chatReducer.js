@@ -90,7 +90,11 @@ export default  function chat(state=initialState,action){
         case TYPE.SEND_DONE:
             {
 
+                    if(!state.sendingList[action.mes.guid])
+                        return {
+                            ...state,
 
+                        };
 
                     let t_sending = deepClone(state.sendingList);
                     t_sending[action.mes.guid].per =  100;
@@ -183,8 +187,8 @@ export default  function chat(state=initialState,action){
                     action.send_done(mes);
 
                 });
-                if(state.sendingList[mes.guid].timer)
-                    clearTimeout(state.sendingList[mes.guid].timer);
+
+                clearTimeout(state.sendingList[mes.guid].timer);
                 //30秒触发发送失败
                 let t_id = setTimeout(function () {
                     action.send_error(mes);
@@ -211,15 +215,19 @@ export default  function chat(state=initialState,action){
             {
                 mes = action.mes;
 
-                //90秒触发发送失败
+                let sending = {};
+                 sending = deepClone(state.sendingList);
                 let t_id = setTimeout(function () {
                     action.send_error(mes);
-                },90000);
-                state.sendingList[mes.guid]={
+                },60000);
+                sending[mes.guid]={
                     per:0,
                     mes,
                     timer : t_id,
                 };
+
+                //90秒触发发送失败
+
 
 
 
@@ -229,7 +237,7 @@ export default  function chat(state=initialState,action){
                 return {
                     ...state,
                     chatNrList:_list,
-                    sendingList:state.sendingList
+                    sendingList:sending
                 };
             }
 

@@ -23,7 +23,7 @@ class SelectPic extends Component {
     _upload(i){
 
         let guid = TencentOSS.guid();
-        this.props._sendingImg(i,guid);
+        this.props.sendingImg(i,guid);
 
         TencentOSS.getAppsign().then(key=>{
 

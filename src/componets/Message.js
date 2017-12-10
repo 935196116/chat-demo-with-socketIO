@@ -7,6 +7,8 @@ import {
     Image,
     ProgressBarAndroid,
     TouchableHighlight,
+    findNodeHandle,
+    NativeModules
 
 } from 'react-native';
 // import Modal from 'react-native-modal'
@@ -20,8 +22,9 @@ class Message extends Component{
 
     constructor(props){
         super(props);
-        console.log(this.props);
+        // console.log(this.props);
     }
+
 
     renderImgMessage()
     {
@@ -131,45 +134,84 @@ class Message extends Component{
 
         function successMessage() {
             return (
-                <TouchableHighlight>
+
                 <View style={[styles.txtBox,styles.scaleY,
                     {
                         justifyContent:item.who===1?left:right,
-
+                        position:"relative",
 
                     }]}>
-                <Text selectable={true} style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+
+
+
+
+
+
+                    <TouchableHighlight
+                        style={{borderRadius:5}}
+                        underlayColor="rgba(0,0,0,0.6)"
+                        onLongPress={({nativeEvent})=>{
+                            NativeModules.UIManager.measure(nativeEvent.target, (x, y, width, height, pageX, pageY) => {
+
+                                        this.props.setCopyBtn(pageX,pageY,this.props.data.item.content,width);
+
+                                    });
+                        }}>
+                        <View
+
+                            style={{alignItems:"center"}}>
+
+
+                            <Text style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+
+
+                        </View>
+
+                    </TouchableHighlight>
                 </View>
-                </TouchableHighlight>
+
 
 
             )
         }
         function failedText() {
             return (
-                <TouchableHighlight>
+
                     <View style={[styles.txtBox,styles.scaleY,
                         {
                             justifyContent:item.who===1?left:right,
 
 
                         }]}>
+
                         <Image source={require("../../img/send_failed.png")} style={{
                             width:18,height:18,marginHorizontal:5,
                         }} />
-                        <Text selectable={true} style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+
+                        <TouchableHighlight
+                            style={{borderRadius:5}}
+                            underlayColor="rgba(0,0,0,0.6)"
+                            onLongPress={({nativeEvent})=>{
+                                NativeModules.UIManager.measure(nativeEvent.target, (x, y, width, height, pageX, pageY) => {
+
+                                    this.props.setCopyBtn(pageX,pageY,this.props.data.item.content,width);
+
+                                });
+                            }}>
+                            <Text selectable={true} style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+                        </TouchableHighlight>
                     </View>
 
 
 
-                </TouchableHighlight>
+
 
             )
         }
         function onprogress() {
             return (
 
-                <TouchableHighlight>
+
                     <View style={[styles.txtBox,styles.scaleY,
                         {
                             justifyContent:item.who===1?left:right,
@@ -177,25 +219,36 @@ class Message extends Component{
 
                         }]}>
                         <ProgressBarAndroid styleAttr='Inverse' style={{height:16,width:16,marginHorizontal:5}}/>
-                        <Text selectable={true} style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+                        <TouchableHighlight
+                            style={{borderRadius:5}}
+                            underlayColor="rgba(0,0,0,0.6)"
+                            onLongPress={({nativeEvent})=>{
+                                NativeModules.UIManager.measure(nativeEvent.target, (x, y, width, height, pageX, pageY) => {
+
+                                    this.props.setCopyBtn(pageX,pageY,this.props.data.item.content,width);
+
+                                });
+                            }}>
+                            <Text selectable={true} style={[styles.txtNr,{ backgroundColor:item.who===1?"#fff":"rgb(163,299,100)"}]}>{item.content}</Text>
+                        </TouchableHighlight>
                     </View>
 
-                </TouchableHighlight>
+
 
             )
         }
 
         if(!item.failed && sendingItem=== undefined || sendingItem===100 || item.who===1)
         {
-            return  successMessage();
+            return  successMessage.bind(this)();
         }
         else if(item.failed || sendingItem.per===-1000)
         {
-            return  failedText();
+            return  failedText.bind(this)();
         }
         else
         {
-            return  onprogress();
+            return  onprogress.bind(this)();
         }
 
 
@@ -232,7 +285,7 @@ const styles = StyleSheet.create({
         flex:1,
 
         flexDirection:"row",
-        marginVertical:5,
+        marginVertical:8,
         alignItems:"center",
         marginHorizontal:5
     },
@@ -266,7 +319,8 @@ const styles = StyleSheet.create({
         flex:1,
         textAlign:"center",
         color:"#666"
-    }
+    },
+
 
 
 
